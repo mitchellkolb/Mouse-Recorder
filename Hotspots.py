@@ -16,7 +16,7 @@ from pynput.mouse import Listener, Button, Controller
 app = ctk.CTk()
 # Calculate window position to center the GUI in the middle of the users screen dynamically
 window_width = 500
-window_height = 250
+window_height = 300
 screen_width = app.winfo_screenwidth()
 screen_height = app.winfo_screenheight()
 center_x = int(screen_width / 2 - window_width / 2)
@@ -28,6 +28,7 @@ app.title("HotSpots")
 app.attributes("-topmost", True)
 
 mouseList = [(1239,368, 1), (1020, 725, 2), (1630, 737, 0.1), (1239,368, 0.5)]
+listener = None
 
 
 #This moves the mouse from either the local saved record or one from the file
@@ -44,15 +45,17 @@ def replayMM():
 
 
 def recordMM():
-    print("RECORD MouseMovements")
-    # Define a target function for the thread
-    def start_listener():
-        with mouse.Listener(on_click=on_click, on_scroll=on_scroll) as listener:
-            listener.join()
-    
-    # Start the listener in a separate thread
-    listener_thread = threading.Thread(target=start_listener)
-    listener_thread.start()
+    global listener  # Use the global listener object
+    if listener is None:
+        # Start listening to mouse events
+        listener = mouse.Listener(on_click=on_click, on_scroll=on_scroll)
+        listener.start()  # Use start instead of join to not block the main thread
+        print("Recording started")
+    else:
+        # Stop the listener if it's already running
+        listener.stop()
+        listener = None
+        print("Recording stopped")
 
 
 def on_click(x, y, button, pressed):
@@ -163,7 +166,8 @@ def mouseClick():
 
 def savedFunction():
     print("Viewing Saved Motions")
-    combobox.pack(side="bottom", padx=10, pady=10)
+    combobox.grid(row=1, column=0, padx=10, pady=(20,20), sticky="nsew")
+
 def combobox_callback(choice):
     print("combobox dropdown clicked:", choice)
 
@@ -173,21 +177,28 @@ def combobox_callback(choice):
 custom_font = ("Arial", 13, "bold")
 
 startRun = ctk.CTkButton(app, text="Record", font=custom_font, command=replayMM, width=75, height=50)
-startRun.pack(side="left", padx=15, pady=10)
+startRun.grid(row=0, column=0, padx=10, pady=(0,0), sticky="w")
 
-startRun = ctk.CTkButton(app, text="Replay", font=custom_font, command=recordMM, width=75, height=50)
-startRun.pack(side="left", padx=10, pady=10)
+startRun = ctk.CTkButton(app, text="Replay", font=custom_font, command=replayMM, width=75, height=50)
+startRun.grid(row=0, column=1, padx=10, pady=(0,0), sticky="w")
+
+# Assuming 'recordBtn' is the button for toggling recording
+recordBtn = ctk.CTkButton(app, text="Toggle Record", font=custom_font, command=recordMM, width=75, height=50)
+recordBtn.grid(row=0, column=2, padx=10, pady=(0,0), sticky="w")
 
 savedRun = ctk.CTkButton(app, text="Saved", font=custom_font, command=savedFunction, width=75, height=50)
-savedRun.pack(side="left", padx=10, pady=10)
+savedRun.grid(row=0, column=3, padx=10, pady=(0,0), sticky="w")
+
 
 dropDownValues = ["option 1", "option 2"]
 combobox_var = ctk.StringVar(value="option 2")
 combobox = ctk.CTkComboBox(app, values=["option 1", "option 2"], command=combobox_callback, variable=combobox_var)
 
 combobox_var.set("option 2")
-combobox.pack_forget()
+#combobox.grid_forget()
 
+app.grid_columnconfigure((0,1), weight=1) #This makes the widgets in the center of left right
+app.grid_columnconfigure((1,2), weight=1) #This makes the widgets in the center of left right
 
 app.mainloop()
 
