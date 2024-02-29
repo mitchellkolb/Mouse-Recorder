@@ -1,7 +1,7 @@
 
 import os
 import pyautogui
-import time, keyboard
+import time, keyboard, threading
 import customtkinter as ctk
 from tkinter import ttk
 
@@ -40,8 +40,43 @@ def replayMM():
         #time.sleep(1)  # Adjust the delay as needed
 
 
-def recordMM(xPos, yPos):
-    print("REPLAY MouseMovements")
+
+
+
+def recordMM():
+    print("RECORD MouseMovements")
+    # Define a target function for the thread
+    def start_listener():
+        with mouse.Listener(on_click=on_click, on_scroll=on_scroll) as listener:
+            listener.join()
+    
+    # Start the listener in a separate thread
+    listener_thread = threading.Thread(target=start_listener)
+    listener_thread.start()
+
+
+def on_click(x, y, button, pressed):
+    # This function is called when a mouse button is clicked or released.
+    if button == mouse.Button.left:
+        action = 'Pressed' if pressed else 'Released'
+        print(f'Left Button {action} at ({x}, {y})')
+    elif button == mouse.Button.right:
+        action = 'Pressed' if pressed else 'Released'
+        print(f'Right Button {action} at ({x}, {y})')
+    elif button == mouse.Button.middle:
+        action = 'Pressed' if pressed else 'Released'
+        print(f'Middle Button {action} at ({x}, {y})')
+
+def on_scroll(x, y, dx, dy):
+    # This function is called when the mouse wheel is scrolled.
+    if dy > 0:
+        print(f'Scrolled Up at ({x}, {y})')
+    elif dy < 0:
+        print(f'Scrolled Down at ({x}, {y})')
+
+
+
+
 
 
 def sendMM_toFile(mouseList):
@@ -104,25 +139,25 @@ def mouseClick():
 
 
 
-def on_click(x, y, button, pressed):
-    print('{0} at {1}'.format(
-        'Pressed' if pressed else 'Released',
-        (x, y)))
-    if not pressed:
-        # Stop listener
-        return False
+# def on_click(x, y, button, pressed):
+#     print('{0} at {1}'.format(
+#         'Pressed' if pressed else 'Released',
+#         (x, y)))
+#     if not pressed:
+#         # Stop listener
+#         return False
 
-def on_scroll(x, y, dx, dy):
-    print('Scrolled {0} at {1}'.format(
-        'down' if dy < 0 else 'up',
-        (x, y)))
+# def on_scroll(x, y, dx, dy):
+#     print('Scrolled {0} at {1}'.format(
+#         'down' if dy < 0 else 'up',
+#         (x, y)))
 
-def listener():
-    # Collect events until released
-    with mouse.Listener(
-            on_click=on_click,
-            on_scroll=on_scroll) as listener:
-        listener.join()
+# def listener():
+#     # Collect events until released
+#     with mouse.Listener(
+#             on_click=on_click,
+#             on_scroll=on_scroll) as listener:
+#         listener.join()
 
 
 
@@ -140,7 +175,7 @@ custom_font = ("Arial", 13, "bold")
 startRun = ctk.CTkButton(app, text="Record", font=custom_font, command=replayMM, width=75, height=50)
 startRun.pack(side="left", padx=15, pady=10)
 
-startRun = ctk.CTkButton(app, text="Replay", font=custom_font, command=replayMM, width=75, height=50)
+startRun = ctk.CTkButton(app, text="Replay", font=custom_font, command=recordMM, width=75, height=50)
 startRun.pack(side="left", padx=10, pady=10)
 
 savedRun = ctk.CTkButton(app, text="Saved", font=custom_font, command=savedFunction, width=75, height=50)
@@ -160,25 +195,6 @@ app.mainloop()
 
 
 
-
-
-
-
-def moveAndClik():
-    pyautogui.moveTo(xPos, yPos, duration=1)
-    pyautogui.click()
-
-    pyautogui.move(0,-distanceToMoveUp)
-    pyautogui.click()
-
-#time.sleep(2)
-
-"""
-while True:    
-    location = pyautogui.position()
-    print(location)
-    time.sleep(0.1)
-"""
 
 # top left is 0,0
 # bottom right is screen size
