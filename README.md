@@ -29,7 +29,10 @@
 
 ## :dart: About ##
 
-This project includes two features. 1. Code to capture and replay the users mouse movements. 2. A GUI made with customtkinter that is able to be overlayed on the users screen to show that the capturing or replaying is occuring. 
+This project includes two features. 
+1. Code to capture and replay the users mouse movements. 
+2. A GUI made with customtkinter that is able to be overlayed on the users screen to show that the capturing or replaying is occuring. 
+3. A saving system so that you can have multiple recorded mouse movements to replay at anytime.
 
 ## :sparkles: Features ##
 
